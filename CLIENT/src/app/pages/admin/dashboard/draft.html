@@ -1,0 +1,239 @@
+.note-form {
+  display: flex;
+  flex-direction: column;
+  background-color: #303134;
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto 20px;
+  transition: all 0.3s ease;
+}
+
+.notes-container {
+  padding: 20px;
+  background-color: #202124;
+  display: grid;  /* Sử dụng Grid thay vì Masonry */
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));  /* Lưới tự động thay đổi */
+  gap: 15px;  /* Khoảng cách giữa các phần tử */
+  min-height: calc(100vh - 100px);
+}
+
+.note-card {
+  background-color: #303134;
+  border-radius: 8px;
+  padding: 15px;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s;
+  cursor: move;  /* Hiển thị con trỏ kéo thả */
+}
+
+.note-card:hover {
+  transform: scale(1.02);
+}
+
+.cdk-drag-preview {
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+}
+
+.cdk-drag-placeholder {
+  background: rgba(0, 0, 0, 0.1);
+  border: 2px dashed #8ab4f8;
+  border-radius: 8px;
+}
+
+.note-card h3 {
+  margin: 0 0 10px;
+  font-size: 1.2rem;
+}
+
+.note-card p {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+  white-space: pre-wrap;
+}
+
+.note-tags {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.note-tag {
+  background-color: #5f6368;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+}
+
+.note-date {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+  font-size: 0.8rem;
+  color: #9aa0a6;
+}
+
+
+<div class="note-form" [class.expanded]="isTitleExpanded || isContentExpanded">
+    <input 
+      class="note-title-input" 
+      placeholder="Tiêu đề" 
+      [(ngModel)]="noteTitle" 
+      (focus)="onTitleFocus()" 
+      (blur)="onTitleBlur()" 
+    />
+    <textarea 
+      class="note-content-input" 
+      placeholder="Ghi chú..." 
+      [(ngModel)]="noteContent" 
+      (focus)="onContentFocus()" 
+      (blur)="onContentBlur()"
+    ></textarea>
+    <div class="note-actions" *ngIf="isTitleExpanded || isContentExpanded">
+        <button class="note-btn" type="button">
+            <i class="far fa-check-square"></i>
+        </button>
+        <button class="note-btn" type="button">
+            <i class="far fa-image"></i>
+        </button>
+        <button class="pin-btn" type="button" (click)="togglePin()">
+            <i class="fas fa-thumbtack"></i>
+        </button>
+        <button class="note-save-btn">Đóng</button>
+    </div>
+</div>
+
+<!-- Notes Container with Masonry -->
+<div class="notes-container" #notesContainer cdkDropList (cdkDropListDropped)="drop($event)">
+    <div class="note-card" *ngFor="let note of notes; let i = index" cdkDrag
+        (cdkDragStarted)="onDragStart(i)" (cdkDragEnded)="onDragEnd(i)" (cdkDragMoved)="onDragMoved($event, i)"
+        [style.background-color]="note.color">
+        <h3>{{ note.title }}</h3>
+        <p>{{ note.content }}</p>
+        <div class="note-tags">
+            <span *ngFor="let tag of note.tags">{{ tag }}</span>
+        </div>
+        <div class="note-date">{{ note.date }}</div>
+    </div>
+</div>
+
+
+import { Component, HostListener, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { CdkDragDrop, CdkDragMove, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
+import { DragDropModule } from '@angular/cdk/drag-drop';
+
+@Component({
+  selector: 'app-dashboard',
+  standalone: true,
+  imports: [CommonModule, FormsModule, DragDropModule],
+  templateUrl: './dashboard.component.html',
+  styleUrls: ['./dashboard.component.css']
+})
+export class DashboardComponent implements OnInit {
+  noteTitle: string = '';
+  noteContent: string = '';
+  isTitleExpanded: boolean = false;
+  isContentExpanded: boolean = false;
+  isPinned: boolean = false;
+  isFormFocused: boolean = false;
+
+  private dragIndex: number | null = null;  // Lưu chỉ mục phần tử đang kéo
+
+  notes = [
+    { title: 'Nhập tiêu đề...', content: 'truncate...', tags: ['aws'], color: '#1E90FF', date: '13/3', priority: 1 },
+    { title: 'transcript', content: 'destructuring...', tags: ['task'], color: '#2E8B57', date: '11/3/2023', priority: 2 },
+    { title: 'SHOW RA THỜI GIAN CŨN LẠI', content: 'Crawler...', tags: ['aws'], color: '#DAA520', date: '', priority: 3 },
+    { title: 'Tech', content: 'super() là gì ?', tags: ['@Pham Manh Cuong:McP'], color: '#8B0000', date: '', priority: 4 },
+    { title: 'TASK', content: 'Sửa notify realtime...', tags: ['task'], color: '#800000', date: '', priority: 5 },
+    { title: 'Vi du:', content: 'class Animal {...}', tags: [], color: '#4A2C2A', date: '', priority: 6 },
+    { title: 'Phím tắt Format', content: 'Ctrl + k + f...', tags: [], color: '#2F4F4F', date: '', priority: 7 }
+  ];
+
+  ngOnInit() {
+    // Khởi tạo dữ liệu nếu cần
+  }
+
+  onTitleFocus() {
+    this.isTitleExpanded = true;
+    this.isFormFocused = true;
+  }
+
+  onTitleBlur() {
+    if (!this.noteTitle && !this.isFormFocused) {
+      this.isTitleExpanded = false;
+    }
+  }
+
+  onContentFocus() {
+    this.isContentExpanded = true;
+    this.isFormFocused = true;
+  }
+
+  onContentBlur() {
+    if (!this.noteContent && !this.isFormFocused) {
+      this.isContentExpanded = false;
+    }
+  }
+
+  togglePin() {
+    this.isPinned = !this.isPinned;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: MouseEvent) {
+    const form = document.querySelector('.note-form');
+    if (form && !form.contains(event.target as Node)) {
+      this.isFormFocused = false;
+      if (!this.noteTitle) this.isTitleExpanded = false;
+      if (!this.noteContent) this.isContentExpanded = false;
+    }
+  }
+
+  // Xử lý sự kiện khi bắt đầu kéo
+  onDragStart(index: number) {
+    this.dragIndex = index;  // Lưu chỉ mục phần tử đang kéo
+    const noteCard = document.querySelectorAll('.note-card')[index];
+    if (noteCard) {
+      noteCard.classList.add('dragging');
+    }
+  }
+
+  // Xử lý sự kiện khi kết thúc kéo
+  onDragEnd(index: number) {
+    const noteCard = document.querySelectorAll('.note-card')[index];
+    if (noteCard) {
+      noteCard.classList.remove('dragging');
+    }
+    this.dragIndex = null;  // Reset lại chỉ mục khi kéo kết thúc
+  }
+
+  // Xử lý sự kiện khi kéo di chuyển
+  onDragMoved(event: CdkDragMove, index: number) {
+    if (this.dragIndex !== null && this.dragIndex !== index) {
+      const currentIndex = this.dragIndex;
+  
+      // Lấy vị trí của phần tử đang kéo
+      const distanceY = event.pointerPosition.y - event.source.getFreeDragPosition().y;
+  
+      // Điều chỉnh khoảng cách
+      const distanceThreshold = 10;  // Khoảng cách tối thiểu di chuyển
+      if (Math.abs(distanceY) > distanceThreshold) {
+        moveItemInArray(this.notes, currentIndex, index);
+        this.dragIndex = index;  // Cập nhật chỉ mục sau khi swap
+      }
+    }
+  }
+  
+  
+
+  // Xử lý kéo thả
+  drop(event: CdkDragDrop<any>) {
+    moveItemInArray(this.notes, event.previousIndex, event.currentIndex);
+  }
+}

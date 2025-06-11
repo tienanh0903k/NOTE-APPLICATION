@@ -31,5 +31,5 @@
     "strictInputAccessModifiers": true,
     "strictTemplates": true
   },
- "types": ["masonry-layout"]
+//  "types": ["masonry-layout"]
 }
