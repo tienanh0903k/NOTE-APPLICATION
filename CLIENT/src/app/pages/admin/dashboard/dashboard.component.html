@@ -1,1 +1,54 @@
-<p class="text-2xl font-bold">dashboard works!</p>
+<div class="note-form" [class.expanded]="isTitleExpanded || isContentExpanded">
+    <input 
+      class="note-title-input" 
+      placeholder="Tiêu đề" 
+      [(ngModel)]="noteTitle" 
+      (focus)="onTitleFocus()" 
+      (blur)="onTitleBlur()" 
+    />
+    <textarea 
+      class="note-content-input" 
+      placeholder="Ghi chú..." 
+      [(ngModel)]="noteContent" 
+      (focus)="onContentFocus()" 
+      (blur)="onContentBlur()"
+    ></textarea>
+    <div class="note-actions" *ngIf="isTitleExpanded || isContentExpanded">
+      <button class="note-btn" type="button">
+        <i class="far fa-check-square"></i>
+      </button>
+      <button class="note-btn" type="button">
+        <i class="far fa-image"></i>
+      </button>
+      <button class="pin-btn" type="button" (click)="togglePin()">
+        <i class="fas fa-thumbtack"></i>
+      </button>
+      <button class="note-save-btn">Đóng</button>
+    </div>
+    <div class="note-toolbar" *ngIf="isTitleExpanded || isContentExpanded">
+      <button class="toolbar-btn" type="button"><i class="fas fa-font"></i></button>
+      <button class="toolbar-btn" type="button"><i class="fas fa-paint-brush"></i></button>
+      <button class="toolbar-btn" type="button"><i class="fas fa-bell"></i></button>
+      <button class="toolbar-btn" type="button"><i class="fas fa-plus"></i></button>
+      <button class="toolbar-btn" type="button"><i class="far fa-image"></i></button>
+      <button class="toolbar-btn" type="button"><i class="fas fa-paperclip"></i></button>
+      <button class="toolbar-btn" type="button"><i class="fas fa-ellipsis-v"></i></button>
+      <button class="toolbar-btn" type="button"><i class="fas fa-undo"></i></button>
+      <button class="toolbar-btn" type="button"><i class="fas fa-redo"></i></button>
+    </div>
+  </div>
+  
+  <div class="notes-container">
+    <div #masonryContainer class="notes-masonry">
+      <div class="note-card" *ngFor="let note of notes; let i = index" 
+           [style.background-color]="note.color" 
+           (click)="onCardClick(i)">
+        <h3>{{ note.title }}</h3>
+        <p [innerHTML]="note.content"></p>
+        <div class="note-tags">
+          <span class="note-tag" *ngFor="let tag of note.tags">{{ tag }}</span>
+        </div>
+        <div class="note-date">{{ note.date }}</div>
+      </div>
+    </div>
+  </div>

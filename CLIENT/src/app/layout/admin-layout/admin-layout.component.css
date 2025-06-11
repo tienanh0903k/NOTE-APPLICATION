@@ -1,0 +1,49 @@
+/* Layout container */
+.layout {
+    display: flex;
+    flex-direction: column;
+    /* Header ở trên, main content ở dưới */
+    height: 100vh;
+    /* Full screen height */
+}
+
+/* Header styles */
+app-header {
+    background-color: #202124;
+    color: white;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #3c4043;
+}
+
+/* Main content area (sidebar and content) */
+.main-content {
+    display: flex;
+    flex-grow: 1;
+    background-color: #202124;
+    overflow: hidden;
+}
+
+/* Sidebar styles */
+app-sidebar {
+    background-color: #202124;
+    color: white;
+    width: 250px;
+    /* Fixed width for the sidebar */
+    padding: 20px;
+    border-right: 1px solid #3c4043;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* Content area */
+.content {
+    flex-grow: 1;
+    /* Takes up the remaining space */
+    background-color: #202124;
+    padding: 20px;
+    overflow-y: auto;
+}

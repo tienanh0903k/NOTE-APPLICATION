@@ -15,6 +15,18 @@ export const USER_ROUTES: Routes = [
             {
                 path: 'dashboard',
                 component: DashboardComponent
+            },
+            {
+                path: 'documents',
+                component: DashboardComponent
+            },
+            {
+                path: 'sheets',
+                component: DashboardComponent
+            },
+            {
+                path: 'settings',
+                component: DashboardComponent
             }
         ]
     }

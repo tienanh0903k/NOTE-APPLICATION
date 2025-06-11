@@ -1,26 +1,46 @@
+
 .header {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 20px;
-    background-color: #f1f1f1;
-    border-bottom: 1px solid #ddd;
-  }
-  
-  .logo {
-    font-size: 20px;
-    font-weight: bold;
-  }
-  
-  .user-info {
-    display: flex;
-    gap: 10px;
-  }
-  
-  button {
-    padding: 5px 10px;
-    background-color: #0073e6;
-    color: white;
-    border: none;
-    cursor: pointer;
-  }
-  
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  width: 100%;
+}
+.logo {
+  display: flex;
+  align-items: center;
+}
+.logo img {
+  width: 30px;
+  height: 30px;
+  margin-right: 10px;
+}
+.search-bar {
+  background-color: white;
+  border-radius: 4px;
+  padding: 5px 10px;
+  width: 60%;
+  margin-left: 20px;
+}
+.search-bar input {
+  border: none;
+  outline: none;
+  width: 100%;
+}
+.icons {
+  display: flex;
+  align-items: center;
+}
+.icons img {
+  width: 24px;
+  height: 24px;
+  margin-left: 10px;
+}
+.user-profile {
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  object-fit: cover;
+  margin-left: 10px;
+}
