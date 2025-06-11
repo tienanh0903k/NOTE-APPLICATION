@@ -11,9 +11,5 @@ export const appRoutes: Routes = [
   {
     path: 'user',
     loadChildren: () => import('./routes/user.route').then(m => m.USER_ROUTES)
-  },
-  {
-    path: 'admin',
-    // component: AdminComponent // Component cho admin
   }
 ];
