@@ -38,17 +38,21 @@
     </div>
   </div>
   
-  <div class="notes-container">
-    <div #masonryContainer class="notes-masonry">
-      <div class="note-card" *ngFor="let note of notes; let i = index" 
-           [style.background-color]="note.color" 
-           (click)="onCardClick(i)">
-        <h3>{{ note.title }}</h3>
-        <p [innerHTML]="note.content"></p>
-        <div class="note-tags">
-          <span class="note-tag" *ngFor="let tag of note.tags">{{ tag }}</span>
-        </div>
-        <div class="note-date">{{ note.date }}</div>
+  <div #masonryContainer class="notes-masonry" cdkDropList (cdkDropListDropped)="drop($event)">
+    <div class="note-card" *ngFor="let note of notes; let i = index"
+         cdkDrag
+         [style.background-color]="note.color"
+         (cdkDragStarted)="onDragStart(i)"
+         (cdkDragEnded)="onDragEnd(i)"
+         (cdkDragMoved)="onDragMoved($event, i)">
+      <h3>{{ note.title }}</h3>
+      <p [innerHTML]="note.content"></p>
+      <div class="note-tags">
+        <span class="note-tag" *ngFor="let tag of note.tags">{{ tag }}</span>
       </div>
+      <div class="note-date">{{ note.date }}</div>
     </div>
   </div>
+  
+  
+  

@@ -1,17 +1,19 @@
-import { Component, HostListener, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
+import { Component, HostListener, AfterViewInit, ElementRef, ViewChild, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { CdkDragDrop, CdkDragMove, moveItemInArray } from '@angular/cdk/drag-drop';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
-declare var Masonry: any; // Khai báo global nếu dùng CDN
+declare var Masonry: any;  // Khai báo global nếu dùng CDN
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DragDropModule],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
-export class DashboardComponent implements AfterViewInit {
+export class DashboardComponent implements AfterViewInit, OnInit {
   noteTitle: string = '';
   noteContent: string = '';
   isTitleExpanded: boolean = false;
@@ -19,7 +21,9 @@ export class DashboardComponent implements AfterViewInit {
   isPinned: boolean = false;
   isFormFocused: boolean = false;
 
-  // Mock data cho các card với thuộc tính priority
+  private dragIndex: number | null = null;
+  private masonry: any;
+
   notes = [
     {
       title: 'Nhập tiêu đề...',
@@ -81,8 +85,13 @@ export class DashboardComponent implements AfterViewInit {
 
   @ViewChild('masonryContainer') masonryContainer!: ElementRef;
 
+  ngOnInit() {
+    // Khởi tạo dữ liệu nếu cần
+  }
+
   ngAfterViewInit() {
-    new Masonry(this.masonryContainer.nativeElement, {
+    // Khởi tạo Masonry sau khi DOM đã sẵn sàng
+    this.masonry = new Masonry(this.masonryContainer.nativeElement, {
       itemSelector: '.note-card',
       columnWidth: 250,
       gutter: 15,
@@ -90,22 +99,26 @@ export class DashboardComponent implements AfterViewInit {
     });
   }
 
+  // Mở rộng trường tiêu đề khi focus
   onTitleFocus() {
     this.isTitleExpanded = true;
     this.isFormFocused = true;
   }
 
+  // Thu nhỏ trường tiêu đề khi mất focus nếu không có tiêu đề
   onTitleBlur() {
     if (!this.noteTitle && !this.isFormFocused) {
       this.isTitleExpanded = false;
     }
   }
 
+  // Mở rộng trường nội dung khi focus
   onContentFocus() {
     this.isContentExpanded = true;
     this.isFormFocused = true;
   }
 
+  // Thu nhỏ trường nội dung khi mất focus nếu không có nội dung
   onContentBlur() {
     if (!this.noteContent && !this.isFormFocused) {
       this.isContentExpanded = false;
@@ -116,6 +129,7 @@ export class DashboardComponent implements AfterViewInit {
     this.isPinned = !this.isPinned;
   }
 
+  // Đóng form khi click ngoài
   @HostListener('document:click', ['$event'])
   onClickOutside(event: MouseEvent) {
     const form = document.querySelector('.note-form');
@@ -126,14 +140,47 @@ export class DashboardComponent implements AfterViewInit {
     }
   }
 
-  // Đưa card lên đầu khi click
-  onCardClick(index: number) {
-    const note = this.notes.splice(index, 1)[0];
-    this.notes.unshift(note);
-    // Cập nhật lại layout Masonry sau khi thay đổi thứ tự
+  // Xử lý kéo thả
+  drop(event: CdkDragDrop<any>) {
+    moveItemInArray(this.notes, event.previousIndex, event.currentIndex);
+
+    // Cập nhật lại layout của Masonry sau khi kéo thả
     setTimeout(() => {
-      this.masonryContainer.nativeElement.masonry.reloadItems();
-      this.masonryContainer.nativeElement.masonry.layout();
-    }, 0);
+      if (this.masonry) {
+        // Yêu cầu Masonry reload lại các phần tử và tính toán lại vị trí
+        this.masonry.reloadItems();
+        this.masonry.layout();
+      }
+    }, 200);  // Điều chỉnh thời gian chờ nếu cần thiết
+  }
+
+  onDragStart(index: number) {
+    // Ẩn hoặc thay đổi trạng thái của phần tử khi bắt đầu kéo
+    const noteCard = document.querySelectorAll('.note-card')[index];
+    if (noteCard) {
+      noteCard.classList.add('dragging');
+    }
+  }
+
+  // Xử lý sự kiện khi kết thúc kéo
+  onDragEnd(index: number) {
+    // Khôi phục lại trạng thái của phần tử khi kết thúc kéo
+    const noteCard = document.querySelectorAll('.note-card')[index];
+    if (noteCard) {
+      noteCard.classList.remove('dragging');
+    }
+  }
+
+  onDragMoved(event: CdkDragMove, index: number) {
+    if (this.dragIndex !== null && this.dragIndex !== index) {
+      const currentIndex = this.dragIndex;
+      const distance = event.pointerPosition.y - event.source.getFreeDragPosition().y;
+
+      // Kiểm tra xem phần tử có đi qua vị trí mới không
+      if (distance > 50) { // Điều chỉnh khoảng cách khi cần thiết
+        moveItemInArray(this.notes, currentIndex, index); // Swap vị trí nếu đi qua
+        this.dragIndex = index; // Cập nhật chỉ mục sau khi swap
+      }
+    }
   }
 }
